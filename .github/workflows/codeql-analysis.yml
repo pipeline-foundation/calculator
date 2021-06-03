@@ -12,6 +12,9 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.0.2
+
       - name: Checkout repository
         id: checkout_repo
         uses: actions/checkout@v2
@@ -23,9 +26,13 @@ jobs:
           language: csharp
           queries: security-and-quality
 
-      - name: Autobuild
-        id: auto_build
-        uses: github/codeql-action/autobuild@v1
+      - name: Build solution
+        id: build_solution
+        run: |
+          nuget restore .\src\Calculator.sln
+          msbuild .\src\Calculator.sln `
+          /p:Configuration=Release `
+          /p:Platform=x64
 
       - name: Perform CodeQL Analysis
         id: analyze_codeql
